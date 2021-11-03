@@ -18,7 +18,7 @@ class LotItem:
 
 
 def writeToFile(csvItems):
-    with open('data.csv', 'w',) as csvfile:
+    with open('data.csv', 'w', newline="") as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(['Lot Number', 'Name', 'Current Price',
                         'Number of Bids', 'Link'])
@@ -27,15 +27,16 @@ def writeToFile(csvItems):
                             item.currentPrice, item.numberOfBids, item.url])
 
 
-mainUrl = "https://bid.liquidbidding.com/lots#YXVjdGlvbltpZF09NjY1MiZhdWN0aW9uW2xvY2F0aW9uXT1hbGwmYXVjdGlvbltzdGF0dXNdPXVwY29taW5nJmF1Y3Rpb25bdHlwZV09YWxsJmxpbWl0PTE1MCZsb3RbY2F0ZWdvcnldPWFsbCZsb3RbbG9jYXRpb25dPWFsbCZsb3RbbWlsZV9yYWRpdXNdPTI1JnBhZ2U9MQ.."
 driver = webdriver.Firefox()
+listingItems = []
+mainUrl = "https://bid.liquidbidding.com/lots#YXVjdGlvbltpZF09NjY1MiZhdWN0aW9uW2xvY2F0aW9uXT1hbGwmYXVjdGlvbltzdGF0dXNdPXVwY29taW5nJmF1Y3Rpb25bdHlwZV09YWxsJmxpbWl0PTE1MCZsb3RbY2F0ZWdvcnldPWFsbCZsb3RbbG9jYXRpb25dPWFsbCZsb3RbbWlsZV9yYWRpdXNdPTI1JnBhZ2U9MQ.."
 
 driver.get(mainUrl)
 # todo: make this a smart wait by waiting for exact elements to finish loading
 time.sleep(3)
 soup = BeautifulSoup(driver.page_source, "html.parser")
 
-listingItems = soup.find_all("div", class_='item-lot')
+listingItems += soup.find_all("div", class_='item-lot')
 
 csvItems = []
 
