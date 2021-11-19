@@ -40,19 +40,39 @@ def getItemInfoInCsvList(listingItems):
     return csvItems
 
 
-driver = webdriver.Firefox()
-listingItems = []
-mainUrl = "https://bid.liquidbidding.com/lots#YXVjdGlvbltpZF09NjUyMyZhdWN0aW9uW2xvY2F0aW9uXT1hbGwmYXVjdGlvbltzdGF0dXNdPXVwY29taW5nJmF1Y3Rpb25bdHlwZV09YWxsJmxpbWl0PTE1MCZsb3RbY2F0ZWdvcnldPWFsbCZsb3RbbG9jYXRpb25dPWFsbCZsb3RbbWlsZV9yYWRpdXNdPTI1JnBhZ2U9MQ.."
+def getAllListingItems(soup):
+    listingItems = []
+    # todo: figure out what happens if there are no pages
+    pageLength = soup.find("ul", class_="pagination pull-right").find_all("li")
 
+    lastPage = int(pageLength[len(pageLength) - 2].a.getText())
+    currentPage = int(soup.find("li", class_="active").a.getText())
+
+    while currentPage < lastPage:
+        # todo: handle modal popup
+        # todo: wait for page to load
+        time.sleep(1)
+        soup = BeautifulSoup(driver.page_source, "html.parser")
+        listingItems += soup.find_all("div", class_='item-lot')
+        driver.find_element(
+            by="css selector", value="#lot_listing > div:nth-child(4) > div > div.col-sm-7 > ul > li:nth-child(9)").click()
+        currentPage += 1
+
+    time.sleep(1)
+    soup = BeautifulSoup(driver.page_source, "html.parser")
+    listingItems += soup.find_all("div", class_='item-lot')
+    return listingItems
+
+
+driver = webdriver.Firefox()
+mainUrl = "https://bid.liquidbidding.com/lots#YXVjdGlvbltpZF09NjUyMyZhdWN0aW9uW2xvY2F0aW9uXT1hbGwmYXVjdGlvbltzdGF0dXNdPXVwY29taW5nJmF1Y3Rpb25bdHlwZV09YWxsJmxpbWl0PTE1MCZsb3RbY2F0ZWdvcnldPWFsbCZsb3RbbG9jYXRpb25dPWFsbCZsb3RbbWlsZV9yYWRpdXNdPTI1JnBhZ2U9MQ.."
 driver.get(mainUrl)
 # todo: make this a smart wait by waiting for exact elements to finish loading
-time.sleep(3)
+time.sleep(2)
 soup = BeautifulSoup(driver.page_source, "html.parser")
 
-listingItems += soup.find_all("div", class_='item-lot')
-
+listingItems = getAllListingItems(soup)
 csvItems = getItemInfoInCsvList(listingItems)
-
 
 driver.close()
 writeToFile(csvItems)
